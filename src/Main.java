@@ -24,11 +24,39 @@ public class Main {
                     case "exit" -> running = false;
 
                     case "echo" -> {
+                        String line = "";
                         for (int i = 1; i < arguments.size(); i++) {
-                            if (i == arguments.size() - 1) {
-                                System.out.println(arguments.get(i));
-                            } else {
-                                System.out.print(arguments.get(i) + " ");
+                            line += arguments.get(i);
+                        }
+
+                        if (line.contains("\'")) {
+                            String printLine = "";
+                            for (int i = 1; i < arguments.size(); i++) {
+                                if (arguments.get(i).startsWith("\'")) {
+                                    printLine += arguments.get(i).replace("\'", "");
+                                }
+                                else if (arguments.get(i).endsWith("\'")) {
+                                    printLine += " " + arguments.get(i).replace("\'", "");
+                                } 
+                                else {
+                                    if (arguments.get(i).equals("")) {
+                                        arguments.set(i, " ");
+                                    }
+                                    printLine += arguments.get(i);
+                                }
+                            }
+                            System.out.println(printLine);
+                        } else {
+                            for (int i = 1; i < arguments.size(); i++) {
+                                if (arguments.get(i).equals("")) {
+                                    continue;
+                                }
+                                if (i == arguments.size() - 1) {
+                                    System.out.println(arguments.get(i).trim());
+                                } 
+                                else {
+                                    System.out.print(arguments.get(i).trim() + " ");
+                                }    
                             }
                         }
                     }
@@ -40,7 +68,8 @@ public class Main {
                             arguments.get(1).equals("pwd")  ||
                             arguments.get(1).equals("cd")) {
                                 System.out.println(arguments.get(1) + " is a shell builtin");
-                        } else {
+                        } 
+                        else {
                             String path = findPath(arguments.get(1));
                             if (path != null) {
                                 System.out.println(arguments.get(1) + " is " + path);
