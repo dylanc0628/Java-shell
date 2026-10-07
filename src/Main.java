@@ -14,6 +14,7 @@ public class Main {
             String currentDir = System.getProperty("user.dir");
 
             while (running) {
+                boolean check = false;
                 System.out.print("$ ");
 
                 String userInput = scanner.nextLine();
@@ -29,7 +30,7 @@ public class Main {
                             line += arguments.get(i);
                         }
 
-                        if (line.contains("\'")) {
+                        if (line.contains("\'") && !line.contains("\"")) {
                             String printLine = "";
                             for (int i = 1; i < arguments.size(); i++) {
                                 if (arguments.get(i).startsWith("\'")) {
@@ -46,7 +47,31 @@ public class Main {
                                 }
                             }
                             System.out.println(printLine);
-                        } else {
+                        } 
+                        else if (line.contains("\"")) {
+                            String printLine = "";
+                            for (int i = 1; i < arguments.size(); i++) {
+                                if (arguments.get(i).startsWith("\"") && arguments.get(i).endsWith("\"") && i < arguments.size() - 1) {
+                                    printLine += arguments.get(i).replace("\"", "") + " ";
+                                    check = true;
+                                }
+                                else if (arguments.get(i).startsWith("\"")) {
+                                    printLine += arguments.get(i).replace("\"", "");
+                                }
+                                else if (arguments.get(i).endsWith("\"")) {
+                                    printLine += " " + arguments.get(i).replace("\"", "");
+                                }
+                                else if (arguments.get(i).equals("") && !check) {
+                                    arguments.set(i, " ");
+                                    printLine += arguments.get(i);
+                                }
+                                else {
+                                    printLine += arguments.get(i);
+                                }
+                            }
+                            System.out.println(printLine);
+                        }
+                        else {
                             for (int i = 1; i < arguments.size(); i++) {
                                 if (arguments.get(i).equals("")) {
                                     continue;
