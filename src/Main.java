@@ -25,14 +25,14 @@ public class Main {
 
                     case "echo" -> {
                         String line = "";
-                        for (int i = 1; i < arguments.size(); i++) {
+                        for (int i = 2; i < arguments.size(); i++) {
                             line += arguments.get(i);
                         }
                         
-                        if (line.contains("\\")) {
+                        if (line.contains("\\") && !line.contains("\'") && !line.contains("\"")) {
                             String printLine = "";
                             char[] charArray = line.toCharArray();
-                            for(int i = 1; i < line.length(); i++) {
+                            for(int i = 0; i < line.length(); i++) {
                                 if (charArray[i] == '\\' && charArray[i + 1] != '\\') {} 
                                 else if (charArray[i] == ' ' && charArray[i + 1] == ' ') {}
                                 else {
@@ -44,28 +44,49 @@ public class Main {
                         else if (line.contains("\'") && !line.contains("\"")) {
                             String printLine = "";
                             char[] char_array = line.toCharArray();
-                            for (int i = 1; i < line.length(); i++) {
+                            for (int i = 0; i < line.length(); i++) {
                                 if (char_array[i] != '\'') {
                                     printLine += char_array[i];
                                 }
                             }
                             System.out.println(printLine);
                         } 
-                        else if (line.contains("\"")) {
+                        else if (line.startsWith("\'")) {
+                            String printLine = "";
+                            char[] charArray = line.toCharArray();
+                            for (int i = 0; i < line.length(); i++) {
+                                if (charArray[i] != '\'') {
+                                    printLine += charArray[i];
+                                }
+                            }
+                            System.out.println(printLine);
+                        }
+                        else if (line.contains("\"") && !line.contains("\'") && !line.contains("\\")) {
                             String printLine = "";
                             char[] charArray = line.toCharArray();
                             for (int i = 1; i < line.length(); i++) {
                                 if (charArray[i] != '\"') {
-                                    if (charArray[i - 1] == ' ' && charArray[i] == ' ') {
-                                        continue;
-                                    }
+                                    if (charArray[i - 1] == ' ' && charArray[i] == ' ') {}
+                                    printLine += charArray[i];
+                                }
+                            }
+                            System.out.println(printLine);
+                        }
+                        else if (line.startsWith("\"")) {
+                            String printLine = "";
+                            char[] charArray = line.toCharArray();
+                            for (int i = 1; i < line.length(); i++) {
+                                if (charArray[i] == '\\' && charArray[i + 1] == '\"') {}
+                                else if (charArray[i] == '\\' && charArray[i + 1] == '\\') {}
+                                else if (charArray[i] == '\"' && charArray[i - 1] != '\\') {}
+                                else {
                                     printLine += charArray[i];
                                 }
                             }
                             System.out.println(printLine);
                         }
                         else {
-                            for (int i = 2; i < arguments.size(); i++) {
+                            for (int i = 1; i < arguments.size(); i++) {
                                 if (arguments.get(i).equals(" ")) {
                                     if (arguments.get(i + 1).equals(" ")) {
                                         continue;
