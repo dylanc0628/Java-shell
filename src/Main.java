@@ -14,12 +14,11 @@ public class Main {
             String currentDir = System.getProperty("user.dir");
 
             while (running) {
-                boolean check = false;
                 System.out.print("$ ");
 
                 String userInput = scanner.nextLine();
 
-                List<String> arguments = new ArrayList<>(Arrays.asList(userInput.split(" ")));
+                List<String> arguments = new ArrayList<>(Arrays.asList(userInput.split("(?<=\\s)|(?=\\s)")));
                 
                 switch (arguments.get(0).toLowerCase().strip()) {
                     case "exit" -> running = false;
@@ -29,60 +28,52 @@ public class Main {
                         for (int i = 1; i < arguments.size(); i++) {
                             line += arguments.get(i);
                         }
-
-                        if (line.contains("\'") && !line.contains("\"")) {
+                        
+                        if (line.contains("\\")) {
                             String printLine = "";
-                            for (int i = 1; i < arguments.size(); i++) {
-                                if (arguments.get(i).startsWith("\'")) {
-                                    printLine += arguments.get(i).replace("\'", "");
-                                }
-                                else if (arguments.get(i).endsWith("\'")) {
-                                    printLine += " " + arguments.get(i).replace("\'", "");
-                                } 
+                            char[] charArray = line.toCharArray();
+                            for(int i = 1; i < line.length(); i++) {
+                                if (charArray[i] == '\\' && charArray[i + 1] != '\\') {} 
+                                else if (charArray[i] == ' ' && charArray[i + 1] == ' ') {}
                                 else {
-                                    if (arguments.get(i).equals("")) {
-                                        arguments.set(i, " ");
-                                    }
-                                    printLine += arguments.get(i);
+                                    printLine += charArray[i];
+                                }
+                            }
+                            System.out.println(printLine);
+                        }
+                        else if (line.contains("\'") && !line.contains("\"")) {
+                            String printLine = "";
+                            char[] char_array = line.toCharArray();
+                            for (int i = 1; i < line.length(); i++) {
+                                if (char_array[i] != '\'') {
+                                    printLine += char_array[i];
                                 }
                             }
                             System.out.println(printLine);
                         } 
                         else if (line.contains("\"")) {
                             String printLine = "";
-                            for (int i = 1; i < arguments.size(); i++) {
-                                if (arguments.get(i).startsWith("\"") && arguments.get(i).endsWith("\"") && i < arguments.size() - 1) {
-                                    printLine += arguments.get(i).replace("\"", "") + " ";
-                                    check = true;
-                                }
-                                else if (arguments.get(i).startsWith("\"")) {
-                                    printLine += arguments.get(i).replace("\"", "");
-                                }
-                                else if (arguments.get(i).endsWith("\"")) {
-                                    printLine += " " + arguments.get(i).replace("\"", "");
-                                }
-                                else if (arguments.get(i).equals("") && !check) {
-                                    arguments.set(i, " ");
-                                    printLine += arguments.get(i);
-                                }
-                                else {
-                                    printLine += arguments.get(i);
+                            char[] charArray = line.toCharArray();
+                            for (int i = 1; i < line.length(); i++) {
+                                if (charArray[i] != '\"') {
+                                    if (charArray[i - 1] == ' ' && charArray[i] == ' ') {
+                                        continue;
+                                    }
+                                    printLine += charArray[i];
                                 }
                             }
                             System.out.println(printLine);
                         }
                         else {
-                            for (int i = 1; i < arguments.size(); i++) {
-                                if (arguments.get(i).equals("")) {
-                                    continue;
+                            for (int i = 2; i < arguments.size(); i++) {
+                                if (arguments.get(i).equals(" ")) {
+                                    if (arguments.get(i + 1).equals(" ")) {
+                                        continue;
+                                    } 
                                 }
-                                if (i == arguments.size() - 1) {
-                                    System.out.println(arguments.get(i).trim());
-                                } 
-                                else {
-                                    System.out.print(arguments.get(i).trim() + " ");
-                                }    
+                                System.out.print(arguments.get(i));
                             }
+                            System.out.println();
                         }
                     }
 
