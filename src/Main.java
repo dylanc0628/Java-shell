@@ -3,9 +3,12 @@ package src;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+
+//TODO: Redirection next
+//TODO: Add testing
+//TODO: Split Main into separate classes and a command interface
 
 public class Main {
     public static void main(String[] args) {
@@ -15,61 +18,14 @@ public class Main {
 
             while (running) {
                 System.out.print("$ ");
-                boolean isBackSlash = false; //only true if iterating over an initial backslash
-                boolean isDoubleQuotes = false;
-                boolean isSingleQuotes = false;
 
-                String userInput = scanner.nextLine();
-
-                List<String> arguments = new ArrayList<>(Arrays.asList(userInput.split("(?<=\\s)|(?=\\s)")));
+                List<String> arguments = tokenize(scanner.nextLine());
+                //System.err.println(arguments);
                 
-                switch (arguments.get(0).toLowerCase().strip()) {
+                switch (arguments.get(0)) {
                     case "exit" -> running = false;
 
-                    case "echo" -> {
-                        String line = "";
-                        for (int i = 2; i < arguments.size(); i++) {
-                            line += arguments.get(i);
-                        }
-                        
-                        char[] charArray = line.toCharArray();
-                        String printLine = "";
-                        for (int i = 0; i < line.length(); i++) {
-                            switch (charArray[i]) {
-                                case '\\' -> {
-                                    isBackSlash = !isBackSlash;
-                                    if (i == 0) {}
-                                    else if (i == line.length() - 1) {}
-
-                                    if (isBackSlash && charArray[i + 1] != '\\') isBackSlash = !isBackSlash;
-                                    else if (isBackSlash && charArray[i + 1] == '\\') {}
-                                    else printLine += charArray[i];
-                                }
-                                case '\'' -> {
-                                    isSingleQuotes = !isSingleQuotes;
-                                    if (i == 0) {}
-                                    else if (i == line.length() - 1 && charArray[i - 1] != '\\') {}
-                                    else if (charArray[i - 1] == '\\') printLine += charArray[i];
-                                    else if (charArray[0] == '\"') printLine += charArray[i];
-                                }
-                                case '\"' -> {
-                                    isDoubleQuotes = !isDoubleQuotes;
-                                    if (i == 0) {}
-                                    else if (i == line.length() - 1) {}
-                                    else if (charArray[i - 1] == '\\') printLine += charArray[i];
-                                }
-                                case ' ' -> {
-                                    if (isDoubleQuotes) printLine += charArray[i];
-                                    else if (isSingleQuotes) printLine += charArray[i];
-                                    else if (Character.isLetterOrDigit(charArray[i - 1]) || charArray[i - 1] == '\"') printLine += charArray[i];
-                                    else if (charArray[i - 1] == '\\') printLine += charArray[i];
-                                    else {}
-                                }
-                                default -> printLine += charArray[i];
-                            }
-                        }
-                        System.out.println(printLine);
-                    }
+                    case "echo" -> System.out.println(String.join(" ", arguments.subList(1, arguments.size())));
 
                     case "type" -> {
                         if (arguments.get(1).equals("echo") ||
@@ -115,6 +71,7 @@ public class Main {
                         if (path != null) {
                             try {
                                 ProcessBuilder pb = new ProcessBuilder(arguments);
+                                pb.directory(new File(currentDir));
                                 pb.inheritIO();
                                 pb.start().waitFor();
                             } catch (IOException e) {
@@ -144,5 +101,52 @@ public class Main {
             }
         }
         return null;
+    }
+
+    public static List<String> tokenize(String input) {
+        List<String> args = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        boolean inToken = false, inSingle = false, inDouble = false;
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+
+            if (inSingle) {
+                if (c == '\'') inSingle = false;
+                else cur.append(c);
+            }
+            else if (inDouble) {
+                if (c == '\"') inDouble = false;
+                else if (c == '\\' && i + 1 < input.length() && "\"\\$`".indexOf(input.charAt(i + 1)) >= 0) {
+                    cur.append(input.charAt(++i));
+                }
+                else cur.append(c);
+            }
+            else if (c == '\\') {
+                if (i + 1 < input.length()) cur.append(input.charAt(++i));
+                inToken = true;
+            }
+            else if (c == '\'') {
+                inSingle = true;
+                inToken = true;
+            }
+            else if (c == '\"') {
+                inDouble = true;
+                inToken = true;
+            }
+            else if (Character.isWhitespace(c)) {
+                if (inToken) {
+                    args.add(cur.toString());
+                    cur.setLength(0);
+                    inToken = false;
+                }
+            } 
+            else {
+                cur.append(c);
+                inToken = true;
+            }
+        }
+        if (inToken) args.add(cur.toString());
+        return args;
     }
 }
